@@ -16,7 +16,7 @@ import bnprotocol.BnUdpProtocolInterface;
 public class BnUdpLogin implements BnUdpProtocolInterface {
 	
 	private static BnUdpLogin INSTANCE = null;
-	
+		
 	/**
 	 * Retornado pelo método loginAttempt em caso de tempo limite exedido.
 	 * Tempo limite acontece quando se esgotam as tentativas máximas de conexão com o 
@@ -25,14 +25,14 @@ public class BnUdpLogin implements BnUdpProtocolInterface {
 	public static final String TIMED_OUT = "-1";
 	
 	/**
-	 * Numero máximo de tentativas de conexão.
+	 * Numero m�ximo de tentativas de conexão.
 	 * Por padrão é 5.
 	 */
 	private int connectionAttempt = 5;
 
 	/**
-	 * Tempo máximo para resposta do servidor em milisegundos.
-	 * Por padrão 1000 ms.
+	 * Tempo m�ximo para resposta do servidor em milisegundos.
+	 * Por padrao 1000 ms.
 	 */
 	private int timeOut = 1000;
 	
