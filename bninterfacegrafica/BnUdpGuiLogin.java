@@ -32,7 +32,7 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 	private JTextField txtField_Login;
 	
 	private JTextField textField_IP;
-	
+	 
 	private JTextField textField_Port;
 	
 	private JButton btnLogin;
@@ -84,8 +84,8 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 		btnLogin.setBounds(131, 163, 89, 23);
 		contentPane.add(btnLogin);
 		
-		textField_IP.setText("localhost");
-		textField_Port.setText("10000");
+		//textField_IP.setText("localhost");
+		//textField_Port.setText("20000");
 		
 		this.setTitle("Login");
 	}
@@ -107,17 +107,20 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 				public void run(){
 					try {
 						
-						String reply = BnUdpLogin.getInstance().loginAttempt(txtField_Login.getText(), "localhost", 10000);
+						String reply = BnUdpLogin.getInstance().loginAttempt(txtField_Login.getText(), textField_IP.getText(), Integer.parseInt(textField_Port.getText()));
 						
 						switch (reply) {
 
 						case BnUdpServerProtcocolInterface.CONNECTION_ACCEPTED:
+							BnUdpTelaClienteChat chat = new BnUdpTelaClienteChat();
+							chat.setIp(textField_IP.getText());
+							chat.setNickname(txtField_Login.getText());
+							chat.setVisible(true);
 							dispose();
-							new BnUdpTelaClienteChat().setVisible(true);
 							return;
 							
 						case INVALID_LOGIN: 
-							JOptionPane.showMessageDialog(null, "Login invalido");
+							JOptionPane.showMessageDialog(null, "Login invalido\nEste Nome ja existe");
 							return;
 							
 						case BnUdpLogin.TIMED_OUT:

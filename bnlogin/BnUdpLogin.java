@@ -25,13 +25,13 @@ public class BnUdpLogin implements BnUdpProtocolInterface {
 	public static final String TIMED_OUT = "-1";
 	
 	/**
-	 * Numero m�ximo de tentativas de conexão.
+	 * Numero m�ximo de tentativas de conexão.
 	 * Por padrão é 5.
 	 */
 	private int connectionAttempt = 5;
 
 	/**
-	 * Tempo m�ximo para resposta do servidor em milisegundos.
+	 * Tempo m�ximo para resposta do servidor em milisegundos.
 	 * Por padrao 1000 ms.
 	 */
 	private int timeOut = 1000;
@@ -77,7 +77,7 @@ public class BnUdpLogin implements BnUdpProtocolInterface {
 		
 		DatagramSocket socket = new DatagramSocket();
 		String type = BnUdpClientProtocolInterface.LOGOUT;
-		String message = type+"#";
+		String message = type+"#"+nickname;
 		
 		return attempt(message, addr, port, socket);
 		
