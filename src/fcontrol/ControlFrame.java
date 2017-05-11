@@ -1,0 +1,9 @@
+package fcontrol;
+
+public enum ControlFrame {
+	CONNECTION_RESPONSE,
+	CONNECTION_REQUEST,
+	CONNECTION_CLOSE,
+	INVALID_NAME,
+	TIME_OUT;
+}
