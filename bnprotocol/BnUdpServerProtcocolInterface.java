@@ -8,35 +8,34 @@ package bnprotocol;
 public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	
 	/**
-	 * Porta padrao do servidor
-	 */
-	public static final int STD_SERVER_PORT = 10000;
-	
-	/**
-	 * CÛdigo que o servidor retorna em caso de conexao aceita.
+	 * C√≥digo que o servidor retorna em caso de conexao aceita.
 	 */
 	public static final String CONNECTION_ACCEPTED = "40";
 	
 	/**
-	 * CÛdigo que o servidor retorna em caso de logout aceito
+	 * C√≥digo que o servidor retorna em caso de logout aceito
 	 */
 	public static final String ACK_LOGOUT = "41";
 	
 	/**
-	 * CÛdigo que o servido retorna quando envia a lista de conectados.
+	 * C√≥digo que o servido retorna quando envia a lista de conectados.
 	 */
 	public static final String LIST_CONNECTED = "42";
 	
 	/**
-	 * CÛdigo que o servido retorna quando o nome de login È invalido.
-	 * Ocorre quando o nome do usuario enviado ja existe.
+	 * C√≥digo que o servido retorna quando o nome de login √© invalido.
 	 */
 	public static final String INVALID_LOGIN = "80";
 	
 	/**
-	 * CÛdigo que o servido retorna quando a mensagem enviado ao servidor È invalida
+	 * C√≥digo que o servido retorna quando a mensagem enviado ao servidor √© invalida
 	 * ...
 	 */
 	public static final String INVALID_MESSAGE = "81";
+	
+	/**
+	 *  C√≥digo enviado do servidor indicando que um usu√°rio de igual ja existe.
+	 */
+	public static final String USER_EXISTS = "82";
 		
 }

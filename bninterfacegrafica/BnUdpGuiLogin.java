@@ -32,7 +32,7 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 	private JTextField txtField_Login;
 	
 	private JTextField textField_IP;
-	
+	 
 	private JTextField textField_Port;
 	
 	private JButton btnLogin;
@@ -84,9 +84,6 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 		btnLogin.setBounds(131, 163, 89, 23);
 		contentPane.add(btnLogin);
 		
-		textField_IP.setText("localhost");
-		textField_Port.setText("10000");
-		
 		this.setTitle("Login");
 	}
 	
@@ -107,13 +104,17 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 				public void run(){
 					try {
 						
-						String reply = BnUdpLogin.getInstance().loginAttempt(txtField_Login.getText(), "localhost", 10000);
+						String reply = BnUdpLogin.getInstance().loginAttempt(txtField_Login.getText(), textField_IP.getText(), Integer.parseInt(textField_Port.getText()));
 						
 						switch (reply) {
 
 						case BnUdpServerProtcocolInterface.CONNECTION_ACCEPTED:
+							BnUdpTelaClienteChat chat = new BnUdpTelaClienteChat();
+							chat.setIp(textField_IP.getText());
+							chat.setNickname(txtField_Login.getText());
+							chat.setServerPort(textField_Port.getText());
+							chat.setVisible(true);
 							dispose();
-							new BnUdpTelaClienteChat().setVisible(true);
 							return;
 							
 						case INVALID_LOGIN: 
@@ -121,11 +122,15 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 							return;
 							
 						case BnUdpLogin.TIMED_OUT:
-							JOptionPane.showMessageDialog(null, "Tente novamente");
+							JOptionPane.showMessageDialog(null, "Tempo limite de resposta exedido\nTente novamente");
 							return;
-
+							
+						case BnUdpGuiLogin.USER_EXISTS:
+							JOptionPane.showMessageDialog(null, "Usuário já existe\nTente novamente");
+							return;
+							
 						default:
-							JOptionPane.showMessageDialog(null, "Erro interno: "+reply);
+							JOptionPane.showMessageDialog(null, "Erro interno: " + reply);
 							break;
 						}
 					} catch (SocketException e) {

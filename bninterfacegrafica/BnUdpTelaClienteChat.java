@@ -281,13 +281,13 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame {
     }//GEN-LAST:event_tTodosStateChanged
 
     private void bLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLogoutActionPerformed
-
         try {
         	String reply = null;
-        	if(loginStatus)
-        		reply = BnUdpLogin.getInstance().logoutAttempt(getNickname(), getServerIP(), BnUdpServerProtcocolInterface.STD_SERVER_PORT);
-        	else 
+        	if(loginStatus){
+        		reply = BnUdpLogin.getInstance().logoutAttempt(nickname, serverIP, Integer.parseInt(serverPort));
+        	}else{ 
         		reply = "Desconectado(a)";
+        	}	
         	switch (reply) {
 			case BnUdpLogin.TIMED_OUT:
 				tChat.setText(tChat.getText()+"Nao foi possivel desconectar  " + reply+ " . . .\n");
@@ -306,7 +306,6 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame {
 				break;
 			}
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }//GEN-LAST:event_bLogoutActionPerformed
@@ -393,4 +392,17 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame {
     public String getMensagem() {
         return mensagem;
     }
+    
+    public void setIp(String ip){
+    	this.serverIP = ip;
+    }
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void setServerPort(String serverPort) {
+		this.serverPort = serverPort;
+	}
+    
 }
