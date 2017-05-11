@@ -13,30 +13,35 @@ public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	public static final int STD_SERVER_PORT = 10000;
 	
 	/**
-	 * Código que o servidor retorna em caso de conexao aceita.
+	 * Cï¿½digo que o servidor retorna em caso de conexao aceita.
 	 */
 	public static final String CONNECTION_ACCEPTED = "40";
 	
 	/**
-	 * Código que o servidor retorna em caso de logout aceito
+	 * Cï¿½digo que o servidor retorna em caso de logout aceito
 	 */
 	public static final String ACK_LOGOUT = "41";
 	
 	/**
-	 * Código que o servido retorna quando envia a lista de conectados.
+	 * Cï¿½digo que o servido retorna quando envia a lista de conectados.
 	 */
 	public static final String LIST_CONNECTED = "42";
 	
 	/**
-	 * Código que o servido retorna quando o nome de login é invalido.
-	 * Ocorre quando o nome do usuario enviado ja existe.
+	 * Cï¿½digo que o servido retorna quando o nome de login ï¿½ invalido.
 	 */
 	public static final String INVALID_LOGIN = "80";
 	
 	/**
-	 * Código que o servido retorna quando a mensagem enviado ao servidor é invalida
+	 * Cï¿½digo que o servido retorna quando a mensagem enviado ao servidor ï¿½ invalida
 	 * ...
 	 */
 	public static final String INVALID_MESSAGE = "81";
+        
+        /*
+        *CÃ³digo que o servidor retorna quando o nome do usuÃ¡rio enviado jÃ¡ existe.
+        */
+        public static final String REPEATED_NAME = "82";
+		
 		
 }
