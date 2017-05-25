@@ -34,8 +34,8 @@ public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	public static final String INVALID_MESSAGE = "81";
 	
 	/**
-	 *  Código enviado do servidor indicando que um usuário de igual ja existe.
+	 *  Código enviado do servidor indicando que um usuário não existe ou nao esta conectado
 	 */
-	public static final String USER_EXISTS = "82";
+	public static final String UNKNOWN_USER = "82";
 		
 }

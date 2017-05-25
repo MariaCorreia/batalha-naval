@@ -45,3 +45,8 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/ClientMain.class
+/Main.class
+/ServerMain.class
+/makefile
+/bin/

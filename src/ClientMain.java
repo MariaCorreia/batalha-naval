@@ -1,4 +1,4 @@
-import bninterfacegrafica.BnUdpGuiLogin;
+import bnguiclient.BnUdpGuiLogin;
 
 /**
  * 
