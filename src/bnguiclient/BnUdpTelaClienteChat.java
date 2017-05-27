@@ -36,6 +36,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
         initComponents();
         clientMessenger = new BnUdpMessengerClient(this);
         clientMessenger.startListning();
+        clientMessenger.ping();
     }
 
     /**

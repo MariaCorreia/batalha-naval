@@ -41,7 +41,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 				
 				System.out.println("Cliente " + socket.getLocalSocketAddress() + " listening . . .");
 												
-				while(true){
+				while(loginStatus){
 					
 					try {
 																			
@@ -50,9 +50,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 						socket.receive(requestData);
 						
 						if(socket.getBroadcast()) {
-							
-							System.out.println(" received ");
-							
+														
 							try {
 								
 								System.out.println("Client " + getName() + " id:" + getId());
@@ -61,36 +59,32 @@ public class BnUdpMessengerClient extends AbstractClient {
 														
 								System.out.println("Client " + socket.getLocalSocketAddress() + " receive (data) " + requestString);
 								
-								String type = requestString.substring(0, 2);
-								String message = null;
-								DatagramPacket replyData = null;
+								String[] split = requestString.split("#");
 								
-								switch (type) {
-								case SEND_MESSAGE:
-									/**
-									 *  012 3	.	.	.      n n+1 . .  m m+1 .
-									 *  02# <destino | [all] > # <origem> # <msg>
-									 */
-									int n = 0;
-									String aux = requestString.substring(3, requestString.length());
-									String destiny = aux.substring(0, n = aux.indexOf("#"));
-									aux = aux.substring(n + 1, n = aux.length());
-									String sender = aux.substring(0, n = aux.indexOf("#"));
-									String msg = aux.substring(n+1, aux.length());
-									 
-									System.out.println("Client " + socket.getLocalSocketAddress() + 
-											" receive (data): " + msg + " from " + sender);
-									
-									String chatString = sender+":"+msg+"\n";
+								switch (split[0]) {
+								case SEND_MESSAGE:							
+									String chatString = split[2]+":"+split[3]+"\n";
 									chat.gettChat().setText(chat.gettChat().getText()+chatString);
-									
 									break;
 								
 								case BnUdpServerProtcocolInterface.ACK_LOGOUT:
 									loginStatus = false;
 									chat.gettChat().setText(chat.gettChat().getText()+"Voce foi desconectado (a) . . .\n");
 									System.out.println("Voce foi desconectado (a) . . . ");
-									chat.dispose();
+									break;
+									
+								case LIST_CONNECTED:					
+									int num = listOfconnections.size() + split.length;
+									System.out.println("Client (list of clients) " + "[" + num + "]");
+									
+									for(int i = 1; i < split.length; i++){
+										listOfconnections.add(split[i]);
+										System.out.println("\n"+split[i]);
+									}
+									
+									break;
+									
+								case UNKNOWN_USER: //TODO: fazer ação
 									break;
 									
 								case BnUdpLogin.TIMED_OUT:
@@ -106,6 +100,9 @@ public class BnUdpMessengerClient extends AbstractClient {
 								
 							} catch (Exception e) {
 								System.err.println("Client "  + socket.getLocalAddress() + " error:" + e.getMessage());
+							} catch (Throwable e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
 							
 						}
@@ -115,6 +112,10 @@ public class BnUdpMessengerClient extends AbstractClient {
 					}
 				}
 				
+				// TODO: levantar tela de login
+				chat.dispose();
+				this.interrupt();
+				
 			}// end public void run
 			
 		}.start();
@@ -122,7 +123,50 @@ public class BnUdpMessengerClient extends AbstractClient {
 	}// end init();
 	
 	/**
-	 * 
+	 * Envia pacotes ao servidor, sinalizando que esta conectado. 
+	 * Responsável por fechar o socket caso o cliente nao esteja logado.
+	 */
+	public void ping(){
+		
+		new Thread(){
+			
+			public void run(){
+				
+				byte[] buf = new byte[FRAME_SIZE];
+				DatagramPacket packet = null;
+				InetAddress address = null;
+				String  message = null;
+				message = PING+"#"+chat.getNickname();
+								
+				while(loginStatus){
+					
+					try {
+						
+						buf = message.getBytes();
+						address = InetAddress.getByName(chat.getServerIP());
+						packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(chat.getServerPort()));
+						
+						socket.send(packet);
+						
+						sleep(PING_INTERVAL);
+						
+					} catch (Exception e) {
+						System.err.println("Client " + socket.getLocalSocketAddress() + " (ping) " + e.getMessage()); 
+					}
+					
+				}
+				
+				socket.close();
+				this.interrupt();
+				
+			}
+			
+		}.start();
+		
+	}
+	
+	/**
+	 * Envia uma mensagem genérica ao servidor.
 	 * @param dest
 	 * @param data
 	 * @throws IOException 
@@ -133,9 +177,8 @@ public class BnUdpMessengerClient extends AbstractClient {
 		InetAddress addr = InetAddress.getByName(chat.getServerIP());
 		int port = Integer.parseInt(chat.getServerPort());
 		DatagramPacket toSend = new DatagramPacket(buf, buf.length, addr, port);
-		//DatagramPacket toSend = new DatagramPacket(buf, buf.length, socket.getLocalAddress(), socket.getLocalPort());
 		
-		System.err.println("Client " + socket.getLocalAddress() + " send (data) :" + data);
+		System.out.println("Client " + socket.getLocalAddress() + " send (data) :" + data);
 		
 		socket.send(toSend);
 	}

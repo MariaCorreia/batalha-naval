@@ -18,7 +18,7 @@ public interface BnUdpClientProtocolInterface extends BnUdpProtocolInterface {
 	 * Tempo padrão em que o cliente envia um pacote de feedback
 	 * em milisegundos
 	 */
-	public static final int PING_TIMEOUT = 5000;
+	public static final int PING_INTERVAL = 5000;
 	
 	/**
 	 * Código enviado para requisitar um bnlogin.
@@ -39,5 +39,10 @@ public interface BnUdpClientProtocolInterface extends BnUdpProtocolInterface {
 	 * Código enviado para envio de mensagem.
 	 */
 	public static final String SEND_MESSAGE = "02";
+	
+	/**
+	 * Enviado como sinal de status de conexão.
+	 */
+	public static final String PING = "03";
 	
 }

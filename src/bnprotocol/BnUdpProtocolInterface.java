@@ -12,6 +12,7 @@ public interface BnUdpProtocolInterface {
 	 * tamanho padrão do frame o qual o servidor espera
 	 */
 	public static final int FRAME_SIZE = 256;
+
 	
 	/**
 	 * Converte os dados (byte) para inteiro entre os indices begin e end.

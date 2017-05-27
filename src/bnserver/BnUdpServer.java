@@ -1,20 +1,16 @@
 package bnserver;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.LinkedList;
 
 import bnprotocol.BnUdpServerProtcocolInterface;
 
-public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
+public class BnUdpServer extends AbstractServer {
 
 	private static BnUdpServer INSTANCE = null;
-	
-	private int port = 10000;
-	
-	private DatagramSocket socket = null;
-	
-	private LinkedList<BnUdpClientNode> clientList;
 		
 	public BnUdpServer getInstance(){
 		if(INSTANCE == null)
@@ -23,7 +19,7 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 	}
 	
 	public BnUdpServer(){
-		this.clientList = new LinkedList<BnUdpClientNode>();
+		super.clientList = new LinkedList<BnUdpClientNode>();
 	}
 
 	public void setPort(int port) {
@@ -51,22 +47,22 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 									
 							try {
 								
-								System.out.println("Server " + getName() + " id:" + getId());
+								//System.out.println("Server " + getName() + " id:" + getId());
 								
-								String requestString = new String(requestData.getData()).trim();
-														
-								System.out.println("Server " + socket.getLocalAddress() + " receive (data) " + requestString);
-								
+								// TODO: USAR SPLIT PARA FAZER O PARSER
+								String requestString = new String(requestData.getData()).trim();								
 								String type = requestString.substring(0, 2);
 								String clientName = requestString.substring(3, requestString.length());
 								String message = null;
 								DatagramPacket replyData = null;
 								
+								//System.out.println("Server " + socket.getLocalAddress() + " receive (data) " + requestString);
+								
 								switch (type) {
 								
 								case CONNECTION_REQUEST:
 									if(clientName.length() <= NICKNAME_SIZE){
-										if(!isConnected(clientName)){
+										if(isConnected(clientName, requestData.getAddress()) == null){
 											clientList.add(
 														new BnUdpClientNode(requestString.substring(3,requestString.length()),
 														requestData.getPort(), 
@@ -89,6 +85,8 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 									socket.send(replyData);
 									System.out.println("Server connected list: ");
 									printClientList();
+									
+									connectedListBroadcast();
 									
 									break;
 									
@@ -124,8 +122,8 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 									String sender = aux.substring(0, n = aux.indexOf("#"));
 									String msg = aux.substring(n + 1, aux.length());
 									
-									System.out.println(receiver);
-																			
+									System.out.println(receiver);						
+									
 									if(receiver.equals(BROADCAST_MSG)){
 										
 										System.out.print("broadcast Server " + socket.getLocalAddress() + " send (data) ");
@@ -169,31 +167,53 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 										/**
 										 * Enviar mensagem para destino
 										 */
-										
-										if (isConnected(receiver)) {
+										BnUdpClientNode clientNode = isConnected(receiver, requestData.getAddress());
+										if (clientNode != null) {
 											message = SEND_MESSAGE+"#"+receiver+"#"+sender+"#"+msg;
 										}else{
 											message = BnUdpServerProtcocolInterface.UNKNOWN_USER+"#";
 										}
 										
+										buffer = message.getBytes();
+										
+										// pacote para o destinatário
+										DatagramPacket toReceiver = new DatagramPacket(buffer, 
+												buffer.length, clientNode.address, 
+												clientNode.port);
+										
+										System.out.println("Server " + socket.getLocalSocketAddress() + " send to:"
+												+ clientNode.address + "(data) " + message);
+										
+										socket.send(toReceiver);
+										
+										DatagramPacket toSender = null;
+										if(!receiver.equals(sender)){
+											// pacote para o transmissor
+											toSender = new DatagramPacket(buffer, 
+													buffer.length, requestData.getAddress(), 
+													requestData.getPort());
+											socket.send(toSender);
+										}
+										
 									}// end if
 								
-								
-									buffer = message.getBytes();
-									replyData = new DatagramPacket(buffer, 
-											buffer.length, requestData.getAddress(), 
-											requestData.getPort());
-									System.out.println("Server " + socket.getLocalSocketAddress() + " send (data) " + message);
-									socket.send(replyData);
-								
 									break;
+								
+								case PING:
+									/*
+									 * Atualiza o ultimo ping do cliente
+									 */
+									for(int i = 0; i < clientList.size(); i++){
+										if(clientList.get(i).name.equals(clientName)){
+											clientList.get(i).lastPing();
+										}
+									}
 
 								default:
 									break;
 								}
 								
 							} catch (Exception e) {
-								//socket.close();
 								System.out.println("Server " + getName() + " id:" + getId() + " " + e.getMessage());
 							}
 							
@@ -208,20 +228,63 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 			}// end public void run
 			
 		}.start();
+		
+		this.refreshClientList();
 				
+	}
+	
+	/**
+	 * Atualiza lista de clientes em um intervalo de tempo.
+	 */
+	private void refreshClientList(){
+		
+		new Thread(){
+			
+			public void run(){
+				
+				while(true){
+					
+					try {
+						
+						for(int index = 0; index < clientList.size(); index++){
+							
+							long lastTime = clientList.get(index).lastPing();
+							//System.out.println("last time : " + lastTime);
+							if(lastTime >= REFRESH_TIME){
+								clientList.remove(index);
+								printClientList();
+							}
+							
+						}
+						
+						sleep(REFRESH_TIME);
+						
+					} catch (Exception e) {
+						System.err.println("Server (client list) " + e.getMessage() );
+					}
+					
+				}
+				
+			}
+			
+		}.start();
+		
 	}
 	
 	/**
 	 * Estado do cliente.
 	 * @param name
-	 * @return Retorna true se o cliente estiver ativo, caso contrário, false.
+	 * @return Retorna um BnUdpClientNode se o cliente estiver ativo, caso contrário, null.
 	 */
-	private boolean isConnected(String name){
-		java.util.Iterator<BnUdpClientNode> i = clientList.iterator();
-		while(i.hasNext())
-			if(i.next().name.equals(name)) return true;
+	private BnUdpClientNode isConnected(String name, InetAddress address){
+		BnUdpClientNode clientNode = null;
+		for(int i = 0 ; i < clientList.size(); i++){
+			if(clientList.get(i).name.equals(name) && clientList.get(i).address.equals(address)){
+				return clientList.get(i);
+			}
+		}
 		
-		return false;
+		return clientNode;
 	}
 	
 	private void printClientList(){
@@ -230,14 +293,43 @@ public class BnUdpServer implements bnprotocol.BnUdpClientProtocolInterface {
 			System.out.println(" Name:" + bnUdpClient.name + " ip:" + bnUdpClient.address);
 		}
 	}
-
-	public String formClientList(){
-        String message = "42#";
-        for (BnUdpClientNode bnUdpClient : clientList) {
-            message = message+"#"+bnUdpClient.name;
-        }
+	
+	/**
+	 * Este método é responsável por enviar a lista de clientes conectados no momento. É geralmente chamada
+	 * nas requisições de login.
+	 * @throws IOException
+	 */
+	private void connectedListBroadcast() throws IOException{
+		
+		byte[] buffer = new byte[FRAME_SIZE];
+		DatagramPacket replyData;
+		
+		String message = BnUdpServerProtcocolInterface.LIST_CONNECTED;
+        for (BnUdpClientNode bnUdpClient : clientList) message += "#"+bnUdpClient.name;
         
-        return message;
-    }
+        System.out.println("Server " + socket.getLocalSocketAddress() + " send (client list) [data] " + message);
+        
+		buffer = message.getBytes();
+		
+		for(int i = 0; i < clientList.size(); i++){
+			
+			System.out.println("[" + i + "]" + clientList.get(i).name);
+			
+			replyData = new DatagramPacket(
+						buffer, 
+						buffer.length, 
+						clientList.get(i).address, 
+						clientList.get(i).port
+					);
+			
+			System.out.println( " sending to " + 
+					clientList.get(i).address + ":" + 
+					clientList.get(i).port + 
+					" data: " + message);
+			
+			socket.send(replyData);
+		}
+		
+	}
 
 }

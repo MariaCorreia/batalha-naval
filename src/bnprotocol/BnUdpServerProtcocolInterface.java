@@ -37,5 +37,17 @@ public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	 *  Código enviado do servidor indicando que um usuário não existe ou nao esta conectado
 	 */
 	public static final String UNKNOWN_USER = "82";
+	
+	/**
+	 * Numero máximo permitido de conectados. 
+	 * Baseado no tamanho de um FRAME_SIZE.
+	 * ( (FRAME_SIZE - 3 ) / BnUdpClientProtocolInterface.NICKNAME_SIZE ) - 15
+	 */
+	public static final int MAX_NUMBER_CONNECTED = 16;
+	
+	/**
+	 * Tempo em ms que o servidor atualiza a lista de clientes
+	 */
+	public static final int REFRESH_TIME = 20000;
 		
 }
