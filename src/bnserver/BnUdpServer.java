@@ -108,6 +108,7 @@ public class BnUdpServer extends AbstractServer {
 									System.out.println("Server " + socket.getLocalAddress() + " send (data) " + message);
 									socket.send(replyData);
 									printClientList();
+									connectedListBroadcast();
 									break;
 									
 								case SEND_MESSAGE:
@@ -121,9 +122,7 @@ public class BnUdpServer extends AbstractServer {
 									aux = aux.substring(n + 1, n = aux.length());
 									String sender = aux.substring(0, n = aux.indexOf("#"));
 									String msg = aux.substring(n + 1, aux.length());
-									
-									System.out.println(receiver);						
-									
+																		
 									if(receiver.equals(BROADCAST_MSG)){
 										
 										System.out.print("broadcast Server " + socket.getLocalAddress() + " send (data) ");
@@ -170,29 +169,50 @@ public class BnUdpServer extends AbstractServer {
 										BnUdpClientNode clientNode = isConnected(receiver, requestData.getAddress());
 										if (clientNode != null) {
 											message = SEND_MESSAGE+"#"+receiver+"#"+sender+"#"+msg;
-										}else{
-											message = BnUdpServerProtcocolInterface.UNKNOWN_USER+"#";
+											buffer = message.getBytes();
+											
+											// pacote para o destinatário
+											DatagramPacket toReceiver = new DatagramPacket(
+													buffer, 
+													buffer.length, 
+													clientNode.address, 
+													clientNode.port
+													);
+											
+											System.out.println("Server " + socket.getLocalSocketAddress() + " send to:"
+													+ clientNode.address + "(data) " + message);
+											
+											socket.send(toReceiver);
+											
+											DatagramPacket toSender = null;
+											if(!receiver.equals(sender)){
+												// pacote para o transmissor
+												toSender = new DatagramPacket(
+														buffer, 
+														buffer.length, 
+														requestData.getAddress(), 
+														requestData.getPort()
+														);
+												socket.send(toSender);
+											}
 										}
 										
-										buffer = message.getBytes();
-										
-										// pacote para o destinatário
-										DatagramPacket toReceiver = new DatagramPacket(buffer, 
-												buffer.length, clientNode.address, 
-												clientNode.port);
-										
-										System.out.println("Server " + socket.getLocalSocketAddress() + " send to:"
-												+ clientNode.address + "(data) " + message);
-										
-										socket.send(toReceiver);
-										
-										DatagramPacket toSender = null;
-										if(!receiver.equals(sender)){
-											// pacote para o transmissor
-											toSender = new DatagramPacket(buffer, 
-													buffer.length, requestData.getAddress(), 
-													requestData.getPort());
+										if(clientNode == null){
+											message = BnUdpServerProtcocolInterface.UNKNOWN_USER+"#";
+											buffer = message.getBytes();
+											
+											// pacote para o remetente
+											DatagramPacket toSender = new DatagramPacket(
+														buffer, 
+														buffer.length, requestData.getAddress(), 
+														requestData.getPort()
+													);
+											
+											System.out.println("Server " + socket.getLocalSocketAddress() + " send to:"
+													+ requestData.getAddress() + "(data) " + message);
+											
 											socket.send(toSender);
+											
 										}
 										
 									}// end if
@@ -229,7 +249,7 @@ public class BnUdpServer extends AbstractServer {
 			
 		}.start();
 		
-		this.refreshClientList();
+		//this.refreshClientList();
 				
 	}
 	

@@ -7,14 +7,11 @@ package bnguiclient;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.net.SocketException;
-
 import javax.swing.JOptionPane;
 
 import bnclient.BnUdpMessengerClient;
 import bnprotocol.BnUdpClientProtocolInterface;
 import bnprotocol.BnUdpServerProtcocolInterface;
-import bnlogin.BnUdpLogin;
 /**
  *
  * @author mvoco_000
@@ -36,7 +33,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
         initComponents();
         clientMessenger = new BnUdpMessengerClient(this);
         clientMessenger.startListning();
-        clientMessenger.ping();
+        //clientMessenger.ping();
     }
 
     /**

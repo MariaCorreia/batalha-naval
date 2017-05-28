@@ -75,7 +75,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 									
 								case LIST_CONNECTED:					
 									int num = listOfconnections.size() + split.length;
-									System.out.println("Client (list of clients) " + "[" + num + "]");
+									System.out.println("Client (client list) " + "[" + num + "]");
 									
 									for(int i = 1; i < split.length; i++){
 										listOfconnections.add(split[i]);
@@ -84,7 +84,9 @@ public class BnUdpMessengerClient extends AbstractClient {
 									
 									break;
 									
-								case UNKNOWN_USER: //TODO: fazer ação
+								case UNKNOWN_USER: 
+									chat.gettChat().setText(chat.gettChat().getText()+"Usuário inexistente ou desconectado (a). . .\n");
+									System.out.println("Usuário inexistente ou desconectado (a) . . .");
 									break;
 									
 								case BnUdpLogin.TIMED_OUT:
@@ -101,7 +103,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 							} catch (Exception e) {
 								System.err.println("Client "  + socket.getLocalAddress() + " error:" + e.getMessage());
 							} catch (Throwable e) {
-								// TODO Auto-generated catch block
+								System.err.println("Cliente " + socket.getLocalAddress() + " error:" + e.getMessage());
 								e.printStackTrace();
 							}
 							
