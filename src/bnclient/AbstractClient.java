@@ -4,14 +4,14 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 import bnprotocol.BnUdpClientProtocolInterface;
-import bnprotocol.BnUdpServerProtcocolInterface;
+import bnprotocol.BnUdpServerProtocolInterface;
 
 /**
  * 
  * @author levymateus
  *
  */
-public class AbstractClient implements BnUdpServerProtcocolInterface, BnUdpClientProtocolInterface{
+public class AbstractClient implements BnUdpServerProtocolInterface, BnUdpClientProtocolInterface{
 	
 	/*
 	 * Socket do cliente

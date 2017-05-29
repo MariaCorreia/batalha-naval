@@ -6,6 +6,7 @@
 package bninterfacegrafica;
 
 import bnserver.BnUdpServer;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -19,6 +20,8 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private String port;
+        
+        private DefaultTableModel modeloTabela;
     
     private BnUdpServer server;
     
@@ -44,7 +47,7 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
         bConfirmarPort = new javax.swing.JButton();
         lbPort = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tabelaClientes = new javax.swing.JTable();
         tPort = new javax.swing.JTextField();
         bConfirmar = new javax.swing.JButton();
 
@@ -94,42 +97,8 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
 
         lbPort.setText("Port do Servidor:");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Clientes Conectados", "IP", "Port"
-            }
-        ) {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-			Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
+        
+        jScrollPane1.setViewportView(tabelaClientes);
 
         tPort.setName("tPort"); // NOI18N
 
@@ -186,7 +155,11 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
 		setPort(tPort.getText());
 		System.out.println(port);
 	    server = new BnUdpServer();
+            server.setPort(Integer.parseInt(port));
 	    server.init();
+            server.initTableModel();
+            modeloTabela = server.getTableModel();
+            tabelaClientes.setModel(modeloTabela);
 	                     
     }//GEN-LAST:event_bConfirmarActionPerformed
 
@@ -200,12 +173,20 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
     private javax.swing.JFrame fPort;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tabelaClientes;
     private javax.swing.JLabel lbPort;
     private javax.swing.JTextField tPort;
     private javax.swing.JTextField tPort1;
     // End of variables declaration//GEN-END:variables
 
+    
+    public javax.swing.JTable gettabelaClientes() {
+		return tabelaClientes;
+	}
+
+	public void settUsuarios(javax.swing.JTable tabelaClientes) {
+		this.tabelaClientes = tabelaClientes;
+	}
     /**
      * @return the port
      */

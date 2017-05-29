@@ -11,7 +11,7 @@ public interface BnUdpProtocolInterface {
 	/**
 	 * tamanho padrão do frame o qual o servidor espera
 	 */
-	public static final int FRAME_SIZE = 256;
+	public static final int FRAME_SIZE = 512;
 
 	
 	/**

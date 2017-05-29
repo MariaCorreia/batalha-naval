@@ -11,13 +11,13 @@ import javax.swing.JOptionPane;
 
 import bnclient.BnUdpMessengerClient;
 import bnprotocol.BnUdpClientProtocolInterface;
-import bnprotocol.BnUdpServerProtcocolInterface;
+import bnprotocol.BnUdpServerProtocolInterface;
 /**
  *
  * @author mvoco_000
  */
 @SuppressWarnings("serial")
-public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpServerProtcocolInterface, BnUdpClientProtocolInterface {
+public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpServerProtocolInterface, BnUdpClientProtocolInterface {
 	
 	private String nickname;
     private String serverIP;
@@ -359,6 +359,14 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
 		this.tChat = tChat;
 	}
 
+       public javax.swing.JTextArea gettUsuarios() {
+		return tUsuarios;
+	}
+
+	public void settUsuarios(javax.swing.JTextArea tUsuarios) {
+		this.tUsuarios = tUsuarios;
+	}
+        
     public String getDestinatario() {
         return destinatario;
     }

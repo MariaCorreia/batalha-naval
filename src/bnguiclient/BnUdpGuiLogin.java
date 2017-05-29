@@ -19,7 +19,7 @@ import javax.swing.Action;
  * @author levymateus
  *
  */
-public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProtcocolInterface {
+public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProtocolInterface {
 
 	/**
 	 * 
