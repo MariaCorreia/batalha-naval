@@ -6,7 +6,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.LinkedList;
 
-import bnprotocol.BnUdpServerProtcocolInterface;
+import bnprotocol.BnUdpServerProtocolInterface;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
 
 public class BnUdpServer extends AbstractServer {
 
@@ -19,13 +21,53 @@ public class BnUdpServer extends AbstractServer {
 	}
 	
 	public BnUdpServer(){
-		super.clientList = new LinkedList<BnUdpClientNode>();
+		super.clientList = new ArrayList<BnUdpClientNode>();
 	}
 
 	public void setPort(int port) {
 		this.port = port;
 	}
-
+        public void setTableModel(DefaultTableModel tableModel) {
+		this.clientTableModel = tableModel;
+	}
+        public DefaultTableModel getTableModel(){
+            return clientTableModel;
+        }
+        
+         public void initTableModel(){
+            clientTableModel = new javax.swing.table.DefaultTableModel(
+                    new Object [][] {
+            },
+            new String [] {
+                "Clientes Conectados", "IP", "Port"
+            }
+        );
+        }
+         
+         private void updateTableModel(String clientName){
+             Object rowData[] = new Object[3];
+             int index = 0;
+             while(index < clientList.size()){
+		if(clientList.get(index).name.equals(clientName)){
+		break;
+		}
+                index++;
+		} 
+                rowData[0] = clientList.get(index).name;
+                rowData[1] = clientList.get(index).address;
+                rowData[2] = clientList.get(index).port;
+                clientTableModel.addRow(rowData);
+             
+        /*/for(int i = 0; i < clientList.size(); i++)
+        //{
+            rowData[0] = clientList.get(i).name;
+            rowData[1] = clientList.get(i).address;
+            rowData[2] = clientList.get(i).port;
+            clientTableModel.addRow(rowData);
+        /}*/
+        }
+        
+         
 	public void init() {
 		
 		new Thread(){
@@ -68,13 +110,15 @@ public class BnUdpServer extends AbstractServer {
 														requestData.getPort(), 
 														requestData.getAddress())
 													);
-											message = BnUdpServerProtcocolInterface.CONNECTION_ACCEPTED+"#";
+                                                                                        updateTableModel(clientName);
+                                                                                            
+											message = BnUdpServerProtocolInterface.CONNECTION_ACCEPTED+"#";
 										}else{ 
-											message =  BnUdpServerProtcocolInterface.UNKNOWN_USER+"#";
+											message =  BnUdpServerProtocolInterface.UNKNOWN_USER+"#";
 										}
 										
 									}else{
-										message = BnUdpServerProtcocolInterface.INVALID_LOGIN+"#";
+										message = BnUdpServerProtocolInterface.INVALID_LOGIN+"#";
 									}
 									
 									buffer = message.getBytes();
@@ -99,8 +143,8 @@ public class BnUdpServer extends AbstractServer {
 										
 										index++;
 									}
-									
-									message = BnUdpServerProtcocolInterface.ACK_LOGOUT+"#";
+									clientTableModel.removeRow(index);
+									message = BnUdpServerProtocolInterface.ACK_LOGOUT+"#";
 									buffer = message.getBytes();
 									replyData = new DatagramPacket(buffer, 
 											buffer.length, requestData.getAddress(), 
@@ -131,7 +175,7 @@ public class BnUdpServer extends AbstractServer {
 										 * Enviar mensagem para todos
 										 */
 										if(clientList.isEmpty()){
-											message = BnUdpServerProtcocolInterface.UNKNOWN_USER+"#";
+											message = BnUdpServerProtocolInterface.UNKNOWN_USER+"#";
 											System.out.println(message + " (unknown user) ");
 										}else{
 										
@@ -198,7 +242,7 @@ public class BnUdpServer extends AbstractServer {
 										}
 										
 										if(clientNode == null){
-											message = BnUdpServerProtcocolInterface.UNKNOWN_USER+"#";
+											message = BnUdpServerProtocolInterface.UNKNOWN_USER+"#";
 											buffer = message.getBytes();
 											
 											// pacote para o remetente
@@ -319,12 +363,13 @@ public class BnUdpServer extends AbstractServer {
 	 * nas requisições de login e logout.
 	 * @throws IOException
 	 */
+        
 	private void connectedListBroadcast() throws IOException{
 		
 		byte[] buffer = new byte[FRAME_SIZE];
 		DatagramPacket replyData;
 		
-		String message = BnUdpServerProtcocolInterface.LIST_CONNECTED;
+		String message = BnUdpServerProtocolInterface.LIST_CONNECTED;
         for (BnUdpClientNode bnUdpClient : clientList) message += "#"+bnUdpClient.name;
         
         System.out.println("Server " + socket.getLocalSocketAddress() + " send (client list) [data] " + message);

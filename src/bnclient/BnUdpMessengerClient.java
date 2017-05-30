@@ -7,7 +7,7 @@ import java.net.SocketException;
 
 import bnguiclient.BnUdpTelaClienteChat;
 import bnlogin.BnUdpLogin;
-import bnprotocol.BnUdpServerProtcocolInterface;
+import bnprotocol.BnUdpServerProtocolInterface;
 
 public class BnUdpMessengerClient extends AbstractClient {
 	
@@ -63,11 +63,11 @@ public class BnUdpMessengerClient extends AbstractClient {
 								
 								switch (split[0]) {
 								case SEND_MESSAGE:							
-									String chatString = split[2]+":"+split[3]+"\n";
+									String chatString = split[2]+" to "+split[1]+": "+split[3]+"\n";
 									chat.gettChat().setText(chat.gettChat().getText()+chatString);
 									break;
 								
-								case BnUdpServerProtcocolInterface.ACK_LOGOUT:
+								case BnUdpServerProtocolInterface.ACK_LOGOUT:
 									loginStatus = false;
 									chat.gettChat().setText(chat.gettChat().getText()+"Voce foi desconectado (a) . . .\n");
 									System.out.println("Voce foi desconectado (a) . . . ");
@@ -77,10 +77,13 @@ public class BnUdpMessengerClient extends AbstractClient {
 									int num = listOfconnections.size() + split.length;
 									System.out.println("Client (client list) " + "[" + num + "]");
 									
+                                                                        String clientString = "";
 									for(int i = 1; i < split.length; i++){
 										listOfconnections.add(split[i]);
 										System.out.println("\n"+split[i]);
+                                                                                 clientString = clientString + split[i]+"\n";
 									}
+                                                                        chat.gettUsuarios().setText(clientString);
 									
 									break;
 									
