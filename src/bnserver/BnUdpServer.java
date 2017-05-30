@@ -316,7 +316,7 @@ public class BnUdpServer extends AbstractServer {
 	
 	/**
 	 * Este método é responsável por enviar a lista de clientes conectados no momento. É geralmente chamada
-	 * nas requisições de login.
+	 * nas requisições de login e logout.
 	 * @throws IOException
 	 */
 	private void connectedListBroadcast() throws IOException{
