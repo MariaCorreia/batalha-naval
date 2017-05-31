@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.LinkedList;
-
 import bnprotocol.BnUdpServerProtocolInterface;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
@@ -104,7 +102,7 @@ public class BnUdpServer extends AbstractServer {
 								
 								case CONNECTION_REQUEST:
 									if(clientName.length() <= NICKNAME_SIZE){
-										if(isConnected(clientName, requestData.getAddress()) == null){
+										if(isConnected(clientName) == null){
 											clientList.add(
 														new BnUdpClientNode(requestString.substring(3,requestString.length()),
 														requestData.getPort(), 
@@ -160,14 +158,16 @@ public class BnUdpServer extends AbstractServer {
 									 *  012 3	.	.	.      n n+1 . .  m m+1 .
 									 *  02# <destino | [all] > # <origem> # <msg>
 									 */
-									int n = 0;
+									/*int n = 0;
 									String aux = requestString.substring(3, requestString.length());
 									String receiver = aux.substring(0, n = aux.indexOf("#"));
 									aux = aux.substring(n + 1, n = aux.length());
 									String sender = aux.substring(0, n = aux.indexOf("#"));
-									String msg = aux.substring(n + 1, aux.length());
+									String msg = aux.substring(n + 1, aux.length());*/
+									
+									String[] aux = requestString.split("#");
 																		
-									if(receiver.equals(BROADCAST_MSG)){
+									if(aux[1].equals(BROADCAST_MSG)){
 										
 										System.out.print("broadcast Server " + socket.getLocalAddress() + " send (data) ");
 										
@@ -179,7 +179,7 @@ public class BnUdpServer extends AbstractServer {
 											System.out.println(message + " (unknown user) ");
 										}else{
 										
-											message = SEND_MESSAGE+"#"+receiver+"#"+sender+"#"+msg;
+											message = SEND_MESSAGE+"#"+aux[1]+"#"+aux[2]+"#"+aux[3];
 											buffer = message.getBytes();
 											
 											System.out.println("/ (broadcast message) " + message);
@@ -205,18 +205,18 @@ public class BnUdpServer extends AbstractServer {
 										
 									}else{
 										
-										System.out.println(" receiver ");
+										System.out.println(" privado !!! " + "origin:" + aux[2] + " destino:" + aux[1] + " msg:" + aux[3]);
 										
 										/**
 										 * Enviar mensagem para destino
 										 */
-										BnUdpClientNode clientNode = isConnected(receiver, requestData.getAddress());
+										BnUdpClientNode clientNode = isConnected(aux[1]);
 										if (clientNode != null) {
-											message = SEND_MESSAGE+"#"+receiver+"#"+sender+"#"+msg;
+											message = "02"+"#"+aux[1]+"#"+aux[2]+"#"+aux[3];
 											buffer = message.getBytes();
 											
 											// pacote para o destinatário
-											DatagramPacket toReceiver = new DatagramPacket(
+											DatagramPacket destino = new DatagramPacket(
 													buffer, 
 													buffer.length, 
 													clientNode.address, 
@@ -224,24 +224,24 @@ public class BnUdpServer extends AbstractServer {
 													);
 											
 											System.out.println("Server " + socket.getLocalSocketAddress() + " send to:"
-													+ clientNode.address + "(data) " + message);
+													+ " " + clientNode.name + clientNode.address + " " + clientNode.port + "(data) " + message);
 											
-											socket.send(toReceiver);
+											socket.send(destino);
 											
-											DatagramPacket toSender = null;
-											if(!receiver.equals(sender)){
-												// pacote para o transmissor
-												toSender = new DatagramPacket(
-														buffer, 
-														buffer.length, 
-														requestData.getAddress(), 
-														requestData.getPort()
-														);
-												socket.send(toSender);
-											}
-										}
+											/**
+											 * Envia para o transmissor
+											 */
+											DatagramPacket toSender = new DatagramPacket(
+													buffer, 
+													buffer.length, 
+													requestData.getAddress(), 
+													requestData.getPort()
+													);
+											socket.send(toSender);
+											
+										}// endif
 										
-										if(clientNode == null){
+										/*if(clientNode == null){
 											message = BnUdpServerProtocolInterface.UNKNOWN_USER+"#";
 											buffer = message.getBytes();
 											
@@ -257,7 +257,7 @@ public class BnUdpServer extends AbstractServer {
 											
 											socket.send(toSender);
 											
-										}
+										}*/
 										
 									}// end if
 								
@@ -340,10 +340,11 @@ public class BnUdpServer extends AbstractServer {
 	 * @param name
 	 * @return Retorna um BnUdpClientNode se o cliente estiver ativo, caso contrário, null.
 	 */
-	private BnUdpClientNode isConnected(String name, InetAddress address){
+	private BnUdpClientNode isConnected(String name){
 		BnUdpClientNode clientNode = null;
 		for(int i = 0 ; i < clientList.size(); i++){
-			if(clientList.get(i).name.equals(name) && clientList.get(i).address.equals(address)){
+			if(clientList.get(i).name.equals(name)){
+				System.out.println(" pessoa conectada :" + clientList.get(i).name);
 				return clientList.get(i);
 			}
 		}
