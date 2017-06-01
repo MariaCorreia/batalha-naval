@@ -3,7 +3,6 @@ package bnserver;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import bnprotocol.BnUdpServerProtocolInterface;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
