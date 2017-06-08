@@ -43,6 +43,14 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 		this.setVisible(true);
 	}
 	
+	public BnUdpGuiLogin(String nickname, String addres, String port) {
+		init();
+		this.txtField_Login.setText(nickname);;
+		this.textField_IP.setText(addres);
+		this.textField_Port.setText(port);
+		this.setVisible(true);
+	}
+	
 	private void init(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 300, 236);
@@ -127,11 +135,11 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 							return;
 							
 						case BnUdpLogin.TIMED_OUT:
-							JOptionPane.showMessageDialog(null, "Tempo limite de resposta exedido\nTente novamente");
+							JOptionPane.showMessageDialog(null, "Tempo limite de resposta excedido\nTente novamente");
 							return;
 							
 						case UNKNOWN_USER:
-							JOptionPane.showMessageDialog(null, "Usuário Inessistente\nTente novamente");
+							JOptionPane.showMessageDialog(null, "Usuário Inexistente\nTente novamente");
 							return;
 							
 						default:

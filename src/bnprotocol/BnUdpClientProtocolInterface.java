@@ -45,4 +45,24 @@ public interface BnUdpClientProtocolInterface extends BnUdpProtocolInterface {
 	 */
 	public static final String PING = "03";
 	
+	/**
+	 * Requesicao para partida.
+	 */
+	public static final String REQUEST_MATCH = "20";
+	
+	/**
+	 * Requisicao para sair da partia.
+	 */
+	public static final String LEAVE_GAME = "21";
+	
+	/**
+	 * Envio da matriz de jogo
+	 */
+	public static final String SEND_MATRIX = "22";
+	
+	/**
+	 * Requisicao de saida da fila de espera para jogar.
+	 */
+	public static final String GET_OUT_QUEUE = "23";
+	
 }

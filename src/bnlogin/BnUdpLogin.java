@@ -64,16 +64,14 @@ public class BnUdpLogin extends AbstractClient implements BnUdpProtocolInterface
 				byte[] buffer = new byte[FRAME_SIZE];
 				DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 											
-				System.out.println("Client " + socket.getLocalSocketAddress() + 
-						" send (data): " + message);
+				System.out.println("Cliente enviou " + message);
 				
 				socket.send(request);
 				socket.receive(reply);
 				
 				String replyString = new String(reply.getData());
 								
-				System.out.println("Client " + socket.getLocalSocketAddress() + 
-						" reply (data): " + replyString.substring(0, 3));
+				System.out.println("Cliente recebeu " + replyString.substring(0, 3));
 								
 				return replyString.substring(0, 2);
 				
@@ -108,8 +106,7 @@ public class BnUdpLogin extends AbstractClient implements BnUdpProtocolInterface
 			InetAddress address = InetAddress.getByName(addr);
 			DatagramPacket request = new DatagramPacket(data, data.length, address, port);
 			
-			System.out.println("Client " + socket.getLocalSocketAddress() + 
-					" send (data): " + message);
+			System.out.println("Client enviou " + message);
 			
 			socket.send(request);
 			

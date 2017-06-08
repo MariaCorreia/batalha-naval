@@ -5,7 +5,7 @@ package bnprotocol;
  * @author levymateus
  *
  */
-public interface BnUdpServerProtocolInterface extends BnUdpProtocolInterface {
+public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	
 	/**
 	 * Código que o servidor retorna em caso de conexao aceita.
@@ -15,7 +15,7 @@ public interface BnUdpServerProtocolInterface extends BnUdpProtocolInterface {
 	/**
 	 * Código que o servidor retorna em caso de logout aceito
 	 */
-	public static final String LOGOUT_ACK = "41";
+	public static final String ACK_LOGOUT = "41";
 	
 	/**
 	 * Código que o servido retorna quando envia a lista de conectados.
@@ -39,7 +39,7 @@ public interface BnUdpServerProtocolInterface extends BnUdpProtocolInterface {
 	public static final String UNKNOWN_USER = "82";
 	
 	/**
-	 * Numero maximo permitido de conectados. 
+	 * Numero máximo permitido de conectados. 
 	 * Baseado no tamanho de um FRAME_SIZE.
 	 * ( (FRAME_SIZE - 3 ) / BnUdpClientProtocolInterface.NICKNAME_SIZE ) - 15
 	 */
@@ -48,29 +48,6 @@ public interface BnUdpServerProtocolInterface extends BnUdpProtocolInterface {
 	/**
 	 * Tempo em ms que o servidor atualiza a lista de clientes
 	 */
-	public static final int REFRESH_INTERVAL = 20000;
-	
-	/**
-	 * Confirmacao de requisicao de partida. 
-	 *  enviado queando o cliente  colocado na fila de espera 
-	 * para jogar.
-	 */
-	public static final String MATCH_REQUEST_ACK = "60";
-	
-	/**
-	 * Confirmacao de saida da partida.
-	 *  neviado quando o cliente deseja sair da partida.
-	 */
-	public static final String LEAVE_GAME_ACK = "61";
-	
-	/**
-	 * Partida criada. Enviada quando uma dupla e combinada para jogar .
-	 */
-	public static final String MATCHMAKING = "62";
-	
-	/**
-	 * Confirmacao de saida da fila de espera. E enviado quando um cliente deseja sair da fila de espera.
-	 */
-	public static final String LEAVE_QUEUE_ACK = "63";
+	public static final int REFRESH_TIME = 20000;
 		
 }

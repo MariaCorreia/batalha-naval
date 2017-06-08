@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 
+import bnclient.AbstractClient;
 import bnclient.BnUdpMessengerClient;
 import bnprotocol.BnUdpClientProtocolInterface;
 import bnprotocol.BnUdpServerProtocolInterface;
@@ -31,9 +32,10 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
      */
     public BnUdpTelaClienteChat() {
         initComponents();
+        bDesistir.setEnabled(false);
         clientMessenger = new BnUdpMessengerClient(this);
         clientMessenger.startListning();
-        //clientMessenger.ping();
+        clientMessenger.ping();
     }
 
     /**
@@ -52,6 +54,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
         tPorta = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         bLogin = new javax.swing.JButton();
+        jFrame2 = new javax.swing.JFrame();
         tMensagem = new javax.swing.JTextField();
         bEnviarMensagem = new javax.swing.JButton();
         tDestinatario = new javax.swing.JTextField();
@@ -63,6 +66,8 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
         jScrollPane3 = new javax.swing.JScrollPane();
         tUsuarios = new javax.swing.JTextArea();
         jLabel4 = new javax.swing.JLabel();
+        bJogar = new javax.swing.JButton();
+        bDesistir = new javax.swing.JButton();
 
         jFrame1.setTitle("Login");
         jFrame1.setAlwaysOnTop(true);
@@ -143,6 +148,19 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
                 .addContainerGap(72, Short.MAX_VALUE))
         );
 
+        jFrame2.setTitle("Partida");
+
+        javax.swing.GroupLayout jFrame2Layout = new javax.swing.GroupLayout(jFrame2.getContentPane());
+        jFrame2.getContentPane().setLayout(jFrame2Layout);
+        jFrame2Layout.setHorizontalGroup(
+            jFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jFrame2Layout.setVerticalGroup(
+            jFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setName("frameChat"); // NOI18N
 
@@ -192,6 +210,20 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
 
         jLabel4.setText("Usuários Conectados:");
 
+        bJogar.setText("Jogar");
+        bJogar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bJogarActionPerformed(evt);
+            }
+        });
+
+        bDesistir.setText("Sair da Fila de Espera");
+        bDesistir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bDesistirActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -202,6 +234,10 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(bDesistir)
+                        .addGap(18, 18, 18)
+                        .addComponent(bJogar)
+                        .addGap(38, 38, 38)
                         .addComponent(bLogout))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -228,7 +264,10 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(bLogout)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(bLogout)
+                            .addComponent(bJogar)
+                            .addComponent(bDesistir))
                         .addGap(13, 13, 13))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel4)
@@ -275,7 +314,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     	}
     	
     	try {
-			this.clientMessenger.sendData(data);
+			AbstractClient.sendData(data, getServerIP(), Integer.parseInt(getServerPort()) );
 		} catch (IOException e) {
 			System.err.println("Client " + clientMessenger + " error:" + e.getMessage());
 		}
@@ -302,6 +341,10 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     private void bLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLogoutActionPerformed
     	clientMessenger.requestLogout();
     }//GEN-LAST:event_bLogoutActionPerformed
+    
+    public void retryLogin(){
+    	new BnUdpGuiLogin(nickname, serverIP, serverPort);
+    }
 
     private void tIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tIPActionPerformed
         // TODO add your handling code here:
@@ -329,11 +372,44 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
         
     }//GEN-LAST:event_bLoginActionPerformed
 
+    private void bJogarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bJogarActionPerformed
+        
+        String data = BnUdpMessengerClient.REQUEST_MATCH+"#"+nickname;
+    	try {
+            AbstractClient.sendData(data, getServerIP(), Integer.parseInt(getServerPort()));
+	} catch (IOException e) {
+            System.err.println("Client " + clientMessenger + " error:" + e.getMessage());
+	}
+        bJogar.setEnabled(false);
+        bDesistir.setEnabled(true);
+        /*
+        destrincharMensagemDoServidor();
+        if (partidaAceita()){*/
+       
+        
+       
+    }//GEN-LAST:event_bJogarActionPerformed
+
+    private void bDesistirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDesistirActionPerformed
+        String data = BnUdpMessengerClient.GET_OUT_QUEUE+"#"+nickname;
+    	try {
+            AbstractClient.sendData(data, getServerIP(), Integer.parseInt(getServerPort()));
+	} catch (IOException e) {
+            System.err.println("Client " + clientMessenger + " error:" + e.getMessage());
+	}
+        bJogar.setEnabled(true);
+        bDesistir.setEnabled(false);
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bDesistirActionPerformed
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bDesistir;
     private javax.swing.JButton bEnviarMensagem;
+    private javax.swing.JButton bJogar;
     private javax.swing.JButton bLogin;
     private javax.swing.JButton bLogout;
     private javax.swing.JFrame jFrame1;
+    private javax.swing.JFrame jFrame2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -397,6 +473,22 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
 
 	public void setServerPort(String serverPort) {
 		this.serverPort = serverPort;
+	}
+
+	public javax.swing.JButton getbDesistir() {
+		return bDesistir;
+	}
+
+	public void setbDesistir(javax.swing.JButton bDesistir) {
+		this.bDesistir = bDesistir;
+	}
+
+	public javax.swing.JButton getbJogar() {
+		return bJogar;
+	}
+
+	public void setbJogar(javax.swing.JButton bJogar) {
+		this.bJogar = bJogar;
 	}
 	
 }

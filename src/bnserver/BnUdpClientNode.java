@@ -4,6 +4,11 @@ import java.net.InetAddress;
 
 public class BnUdpClientNode {
 	
+	/**
+	 * E true se o client estiver jogando e false se ao contrario.
+	 */
+	protected boolean arePlaying = false;
+	
 	protected String name;
 	
 	protected int port;
@@ -31,6 +36,46 @@ public class BnUdpClientNode {
 		this.lastPing = currentTime;
 		
 		return difference;
+	}
+
+	public boolean isArePlaying() {
+		return arePlaying;
+	}
+
+	public void setArePlaying(boolean arePlaying) {
+		this.arePlaying = arePlaying;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public InetAddress getAddress() {
+		return address;
+	}
+
+	public void setAddress(InetAddress address) {
+		this.address = address;
+	}
+
+	public long getLastPing() {
+		return lastPing;
+	}
+
+	public void setLastPing(long lastPing) {
+		this.lastPing = lastPing;
 	}
 
 }

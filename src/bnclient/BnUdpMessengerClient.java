@@ -1,11 +1,13 @@
 package bnclient;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import javax.swing.JOptionPane;
+
 import bnguiclient.BnUdpTelaClienteChat;
+import bnguiclient.BnUdpTelaClienteJogo;
 import bnlogin.BnUdpLogin;
 import bnprotocol.BnUdpServerProtocolInterface;
 
@@ -14,6 +16,8 @@ public class BnUdpMessengerClient extends AbstractClient {
 	private static BnUdpMessengerClient INSTANCE = null;
 			
 	private BnUdpTelaClienteChat chat = null;
+	
+	private BnUdpTelaClienteJogo jogo = null;
 	
 	public BnUdpMessengerClient getInstance(){
 		if(INSTANCE == null)
@@ -26,7 +30,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 	}
 	
 	public BnUdpMessengerClient(){ 
-		
+		// void
 	}
 	
 	/**
@@ -39,7 +43,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 			
 			public void run(){
 				
-				System.out.println("Cliente " + socket.getLocalSocketAddress() + " listening . . .");
+				System.out.println("Cliente escutando na porta " + socket.getPort());
 												
 				while(loginStatus){
 					
@@ -52,13 +56,9 @@ public class BnUdpMessengerClient extends AbstractClient {
 						if(socket.getBroadcast()) {
 														
 							try {
-								
-								System.out.println("Client " + getName() + " id:" + getId());
-								
+																
 								String requestString = new String(requestData.getData()).trim();
-														
-								System.out.println("Client " + socket.getLocalSocketAddress() + " receive (data) " + requestString);
-								
+								System.out.println("Client recebeu " + requestString);
 								String[] split = requestString.split("#");
 								
 								switch (split[0]) {
@@ -67,36 +67,66 @@ public class BnUdpMessengerClient extends AbstractClient {
 									chat.gettChat().setText(chat.gettChat().getText()+chatString);
 									break;
 								
-								case BnUdpServerProtocolInterface.ACK_LOGOUT:
+								case BnUdpServerProtocolInterface.LOGOUT_ACK:
 									loginStatus = false;
-									chat.gettChat().setText(chat.gettChat().getText()+"Voce foi desconectado (a) . . .\n");
+									chat.gettChat().setText(chat.gettChat().getText()+"\n"+"Voce foi desconectado (a) . . .");
 									System.out.println("Voce foi desconectado (a) . . . ");
+									if(JOptionPane.showConfirmDialog(null, "Deseja conectar-se novamente ?", "Desconectado",
+											JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+										chat.retryLogin();
+									}
 									break;
 									
 								case LIST_CONNECTED:					
-									int num = listOfconnections.size() + split.length;
-									System.out.println("Client (client list) " + "[" + num + "]");
+									System.out.println("Lista de clientes ativos:");
 									
-                                                                        String clientString = "";
+									String clientString = "";
 									for(int i = 1; i < split.length; i++){
 										listOfconnections.add(split[i]);
 										System.out.println("\n"+split[i]);
-                                                                                 clientString = clientString + split[i]+"\n";
+										clientString = clientString + split[i]+"\n";
 									}
-                                                                        chat.gettUsuarios().setText(clientString);
-									
+									chat.gettUsuarios().setText(clientString);
 									break;
 									
 								case UNKNOWN_USER: 
-									chat.gettChat().setText(chat.gettChat().getText()+"Usuário inexistente ou desconectado (a). . .\n");
-									System.out.println("Usuário inexistente ou desconectado (a) . . .");
-									break;
+									chat.gettChat().setText(chat.gettChat().getText()+"Usuario inexistente ou desconectado (a). . .\n");
+									System.out.println("Usuario inexistente ou desconectado (a) . . .");
+									break;				
 									
 								case BnUdpLogin.TIMED_OUT:
 									chat.gettChat().setText(chat.gettChat().getText()+"Nao foi possivel desconectar  . . .\n");
 									System.out.println("Nao foi possivel desconectar . . .");
 									break;
 									
+								case MATCH_REQUEST_ACK:
+									chat.gettChat().setText(chat.gettChat().getText()+"Voce este na fila de espera para jogar . . . \n");
+									System.out.println("Voce esta na fila de espera para jogar . . .");
+									break;
+								
+								case LEAVE_GAME_ACK:
+									chat.gettChat().setText(chat.gettChat().getText()+"Voce desistiu da partida.\n");
+									System.out.println("Voce desistiu da partida.");
+									chat.getbDesistir().setEnabled(false);
+									chat.getbJogar().setEnabled(true);
+									jogo.setVisible(false);
+									break;
+								
+								case MATCHMAKING:
+									chat.gettChat().setText(chat.gettChat().getText()+"Voce entrou em uma partida.\n");
+									System.out.println("Voce entrou em uma partida."+INSTANCE);
+									chat.getbJogar().setEnabled(false);
+									chat.getbDesistir().setEnabled(false);
+									jogo = new BnUdpTelaClienteJogo(chat.getServerIP(), Integer.parseInt(chat.getServerPort()), chat.getNickname() );
+									jogo.setVisible(true);  
+									
+									break;
+								
+								case LEAVE_QUEUE_ACK:
+									chat.gettChat().setText(chat.gettChat().getText()+"Voce saiu da fila de espera da partida.\n");
+									System.out.println("Voce saiu da fila de espera da partida.");
+									
+									break;
 
 								default:
 									break;
@@ -104,20 +134,19 @@ public class BnUdpMessengerClient extends AbstractClient {
 								
 								
 							} catch (Exception e) {
-								System.err.println("Client "  + socket.getLocalAddress() + " error:" + e.getMessage());
+								System.err.println("Cliente erro:" + e.getMessage());
 							} catch (Throwable e) {
-								System.err.println("Cliente " + socket.getLocalAddress() + " error:" + e.getMessage());
+								System.err.println("Cliente erro:" + e.getMessage());
 								e.printStackTrace();
 							}
 							
 						}
 													
 					} catch (Exception e) {
-						System.err.println("Client " + e.getMessage());
+						System.err.println("Cliente " + e.getMessage());
 					}
 				}
 				
-				// TODO: levantar tela de login
 				chat.dispose();
 				this.interrupt();
 				
@@ -156,38 +185,17 @@ public class BnUdpMessengerClient extends AbstractClient {
 						sleep(PING_INTERVAL);
 						
 					} catch (Exception e) {
-						System.err.println("Client " + socket.getLocalSocketAddress() + " (ping) " + e.getMessage()); 
+						System.err.println("Cliente (ping) " + e.getMessage()); 
 					}
 					
 				}
-				
-				socket.close();
-				this.interrupt();
 				
 			}
 			
 		}.start();
 		
 	}
-	
-	/**
-	 * Envia uma mensagem genérica ao servidor.
-	 * @param dest
-	 * @param data
-	 * @throws IOException 
-	 */
-	public void sendData(String data) throws IOException{
-		byte[] buf = new byte[FRAME_SIZE];
-		buf = data.getBytes();
-		InetAddress addr = InetAddress.getByName(chat.getServerIP());
-		int port = Integer.parseInt(chat.getServerPort());
-		DatagramPacket toSend = new DatagramPacket(buf, buf.length, addr, port);
 		
-		System.out.println("Client " + socket.getLocalAddress() + " send (data) :" + data);
-		
-		socket.send(toSend);
-	}
-	
 	public void requestLogout(){
 		try {
         	if(loginStatus){
