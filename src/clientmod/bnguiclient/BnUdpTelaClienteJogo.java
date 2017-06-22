@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bnguiclient;
+package clientmod.bnguiclient;
 
-import bnclient.AbstractClient;
-import bnclient.BnUdpMessengerClient;
+import clientmod.bnclient.AbstractClient;
+import clientmod.bnclient.BnUdpMessengerClient;
 import java.io.IOException;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
+
+import bnprotocol.BnUdpProtocolInterface;
 
 /**
  *
@@ -126,7 +128,7 @@ public class BnUdpTelaClienteJogo extends javax.swing.JFrame{
 	    	String data = BnUdpMessengerClient.LEAVE_GAME+"#"+nickname;
 	     	try {
 	     		
-	            AbstractClient.sendData(data, ip, port);
+	     		BnUdpProtocolInterface.sendData(data, ip, port, AbstractClient.getSocket());
 	     		
 	 		} catch (IOException exp) {
 	 	            System.err.println("Cliente error:" + exp.getMessage());

@@ -63,6 +63,11 @@ public interface BnUdpClientProtocolInterface extends BnUdpProtocolInterface {
 	/**
 	 * Requisicao de saida da fila de espera para jogar.
 	 */
-	public static final String GET_OUT_QUEUE = "23";
+	public static final String LEAVE_QUEUE = "23";
+	
+	/**
+	 * 
+	 */
+	public static final String SHOT = "24";
 	
 }

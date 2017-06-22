@@ -34,9 +34,14 @@ public interface BnUdpServerProtocolInterface extends BnUdpProtocolInterface {
 	public static final String INVALID_MESSAGE = "81";
 	
 	/**
-	 *  Código enviado do servidor indicando que um usuário não existe ou nao esta conectado
+	 *  Código enviado do servidor indicando um erro em tempo de execução
 	 */
-	public static final String UNKNOWN_USER = "82";
+	public static final String RUNTIME_ERROR = "82";
+	
+	/**
+	 * Erro referente ao jogo
+	 */
+	public static final String GAME_ERROR = "83";
 	
 	/**
 	 * Numero maximo permitido de conectados. 
@@ -72,5 +77,30 @@ public interface BnUdpServerProtocolInterface extends BnUdpProtocolInterface {
 	 * Confirmacao de saida da fila de espera. E enviado quando um cliente deseja sair da fila de espera.
 	 */
 	public static final String LEAVE_QUEUE_ACK = "63";
+	
+	/**
+	 * 
+	 */
+	public static final String MATRIX_ACCEPTED = "64";
+	
+	/**
+	 * 
+	 */
+	public static final String START_GAME = "65";
+	
+	/**
+	 * 
+	 */
+	public static final String OPPONET_SHOT = "66"; 
+	
+	/**
+	 * Resultado da partida. Enviado quando uma partida termina.
+	 */
+	public static final String MATCH_RESULT = "70";
+	
+	/**
+	 * 
+	 */
+	public static final String ERROR = "82";
 		
 }

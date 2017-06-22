@@ -1,17 +1,26 @@
-package bnserver;
+package servermod.bnserver;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+
+import bnprotocol.BnUdpProtocolInterface;
 import bnprotocol.BnUdpServerProtocolInterface;
+import servermod.bninterfacegrafica.BnUdpGuiServidor;
+
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
+
+import com.sun.istack.internal.NotNull;
 
 public class BnUdpServer extends BnUdpAbstractServer {
 
 	private static BnUdpServer INSTANCE = null;
 	
 	private BnUdpGameServer gameServer = null;
+	
+	private String FIXER;
 			
 	public BnUdpServer getInstance(){
 		if(INSTANCE == null)
@@ -69,28 +78,31 @@ public class BnUdpServer extends BnUdpAbstractServer {
 				try {
 					
 					socket = new DatagramSocket(port);
+					if(socket != null) BnUdpGuiServidor.bConfirmar.setEnabled(false);
 					System.out.println("Server escutando na porta " + socket.getLocalPort());
 					
-					while(true){
+					while(!socket.isClosed()){
 						
 						byte[] buffer = new byte[FRAME_SIZE];
 						DatagramPacket requestData = new DatagramPacket(buffer, buffer.length);
 						socket.receive(requestData);
+						String address = requestData.getAddress().getHostAddress();
 						
 						if(socket.getBroadcast()) {
 									
 							try {
-															
-								String requestString = new String(requestData.getData()).trim();								
-								String type = requestString.substring(0, 2);
-								String clientName = requestString.substring(3, requestString.length());
-								clientName.trim();
+								
+								String requestString = new String(requestData.getData()).trim();	
+								String split[] = requestString.split("#");
+								String type = split[0];
+								String clientName = split[1];
 								String message = null;
 								DatagramPacket replyData = null;
 								
 								switch (type) {
 								
 								case CONNECTION_REQUEST:
+									FIXER = "CONNECTION_REQUEST";
 									if(clientName.length() <= NICKNAME_SIZE){
 										if(getClientByName(clientName) == null){
 											clientList.add(
@@ -102,7 +114,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
                                                                                             
 											message = BnUdpServerProtocolInterface.CONNECTION_ACCEPTED+"#";
 										}else{ 
-											message =  BnUdpServerProtocolInterface.UNKNOWN_USER+"#";
+											message =  BnUdpServerProtocolInterface.RUNTIME_ERROR+"#";
 										}
 										
 									}else{
@@ -123,6 +135,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 									break;
 									
 								case LOGOUT:	
+									FIXER = "LOGOUT";
 									int index = 0;
 									while(index < clientList.size()){
 										if(clientList.get(index).name.equals(clientName)){
@@ -144,6 +157,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 									break;
 									
 								case SEND_MESSAGE:
+									FIXER = "SEND_MESSAGE";
 									String[] aux = requestString.split("#");
 																		
 									if(aux[1].equals(BROADCAST_MSG)){
@@ -154,7 +168,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 										 * Enviar mensagem para todos
 										 */
 										if(clientList.isEmpty()){
-											message = BnUdpServerProtocolInterface.UNKNOWN_USER+"#";
+											message = BnUdpServerProtocolInterface.RUNTIME_ERROR+"#";
 											System.out.println(message + " (unknown user) ");
 										}else{
 										
@@ -223,6 +237,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 									break;
 								
 								case PING:
+									FIXER = "PING";
 									/*
 									 * Atualiza o ultimo ping do cliente
 									 */
@@ -233,11 +248,19 @@ public class BnUdpServer extends BnUdpAbstractServer {
 									}
 									
 								break;
+								
+								
+								/****************************************************************************
+								 * 
+								 *			 Tratamento para protocolos referentes ao jogo
+								 * 
+								 ****************************************************************************/
 												
 								/**
 								 * Apartir deste case usamos as mesmas variaveis em comum...
 								 */
 								case REQUEST_MATCH:
+									FIXER = "REQUEST_MATCH";
 									BnUdpClientNode item = getClientByName(clientName);
 									//System.out.println("nome "+item.name);
 									if(item != null){
@@ -245,7 +268,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 										gameServer.waitingToPlay.push(item);
 										message = MATCH_REQUEST_ACK+"#";
 									}else{
-										message = UNKNOWN_USER+"#";
+										message = RUNTIME_ERROR+"#";
 									}
 									System.out.println("mensagem " + message);
 									byte[] buf = new byte[FRAME_SIZE];
@@ -257,7 +280,8 @@ public class BnUdpServer extends BnUdpAbstractServer {
 									gameServer.printClientList();
 									break;
 								
-								case GET_OUT_QUEUE:
+								case LEAVE_QUEUE:
+									FIXER = "LEAVE_QUEUE";
 									item = getClientByName(clientName);
                                                                         if(item != null){
 										for (int i = 0; i < gameServer.waitingToPlay.size(); i++) {
@@ -266,7 +290,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 										}
 										message = LEAVE_QUEUE_ACK+"#";
 									}else{
-										message = UNKNOWN_USER+"#";
+										message = RUNTIME_ERROR+"#";
 									}
 									buf = message.getBytes();
 									dt = new DatagramPacket(buf, buf.length, item.address, item.port);
@@ -276,28 +300,150 @@ public class BnUdpServer extends BnUdpAbstractServer {
 									break;
 									
 								case LEAVE_GAME:
-									item = getClientByName(clientName);
-									if(item!=null){
-										message = BnUdpServerProtocolInterface.LEAVE_GAME_ACK+"#";
+									FIXER = "LEAVE_GAME";
+									BnMatch match = gameServer.searchMatch(clientName);
+									if(match != null){
+										
+										if(match.player_1.name.equals(clientName)){
+											
+											BnUdpProtocolInterface.sendData(new String(MATCH_RESULT+"#"+match.player_2.name),
+													match.player_2.address.getHostAddress(), match.player_2.port, socket);
+											
+											BnUdpProtocolInterface.sendData(new String(LEAVE_GAME_ACK+"#"),
+													match.player_1.address.getHostAddress(), match.player_1.port, socket);
+										
+										}else{
+											
+											BnUdpProtocolInterface.sendData(new String(MATCH_RESULT+"#"+match.player_1.name),
+													match.player_1.address.getHostAddress(), match.player_1.port, socket);
+											
+											BnUdpProtocolInterface.sendData(new String(LEAVE_GAME_ACK+"#"),
+													match.player_2.address.getHostAddress(), match.player_2.port, socket);
+										}
+										
 									}else{
-										message = UNKNOWN_USER+"#";
+										
+										BnUdpProtocolInterface.sendData(new String(RUNTIME_ERROR+"#"+"Partida nao encontrada"),
+												requestData.getAddress().getHostAddress(), requestData.getPort(), socket);
+										
 									}
+									break;
+									
+								case SEND_MATRIX:
+									FIXER = "SEND_MATRIX";
+									System.out.println("cliente" + clientName + "enviou uma matriz");
+									String string = null;
+									
+									// monta vetor de coordenadas . . .
+									for (int i = 2; i < split.length; i++) string = split[i];
+									
+									BnUdpClientNode c = getClientByName(split[1]); if(c == null) break;
+									match = gameServer.searchMatch(c.name);
+									BnMatrix matrix = new BnMatrix();
+									
+									if(matrix.initialize(string)){ 
+										// garante que foi inicializada com sucesso
+										// sem exeções
+										c.setGameMatrix(matrix);
+										message = MATRIX_ACCEPTED + "#" + c.name;
+									}else{
+										message = ERROR+"#"+"matriz invalida";
+									}
+									
+									buf = new byte[FRAME_SIZE];
 									buf = message.getBytes();
-									dt = new DatagramPacket(buf, buf.length, item.address, item.port);
+									dt = new DatagramPacket(buf, buf.length, match.player_1.address, match.player_1.port);
 									socket.send(dt);
-									System.out.println("Server enviou " + message);
+									dt = new DatagramPacket(buf, buf.length, match.player_2.address, match.player_2.port);
+									socket.send(dt);
+									
+									/**
+									 *  Verificar quando a matriz dos 2 jogadores foram aceitas e enviar iniciar partida	
+									 */
+									match = gameServer.searchMatch(split[1]);
+									
+									/**
+									 * Se os dois jogadores tem uma matriz aceita entao envia START_GAME
+									 */
+									if( match != null && match.player_1.getGameMatrix() != null && match.player_2.getGameMatrix() != null){
+										
+										int rand = (int) Math.random()*2;
+										System.out.println("random="+rand);
+										if(rand > 1){
+											message = START_GAME + "#"+ match.player_1.name;
+											match.player_1.isYourTurn = true;
+										}else{
+											message = START_GAME + "#"+ match.player_2.name;
+											match.player_2.isYourTurn = true;
+										}
+											
+										buf = message.getBytes();
+										dt = new DatagramPacket(buf, buf.length, match.player_1.address, match.player_1.getPort());
+										socket.send(dt);
+										dt = new DatagramPacket(buf, buf.length, match.player_2.address, match.player_2.getPort());
+										socket.send(dt);
+										match.isPalaying = true;
+										System.out.println("Servidor enviou " + message + "para  jogador " + match.player_1.getName() + ", " + match.player_2.name);
+									}
+									
+									break;
+								
+								case SHOT: 
+									FIXER = "SHOT";
+									split = requestString.split("#");
+									match = gameServer.searchMatch(split[1]);
+									
+									if(match != null && match.isPalaying){
+										
+										//TODO: enviar pacote para os dois jogadores
+										if(match.player_1.name.equals(split[1])){
+											
+											int teste = match.player_2.getGameMatrix().hitOnCoord(split[2]);
+											System.out.println("tiro dado por =" + split[1] + " contra = " + match.player_2.name);
+											
+											if(teste == BnMatrix.HIT){
+												
+												// seta coordenada do hit para destruido
+												// match.player_2.getGameMatrix().setCoordValue(split[2], BnMatrix.DESTROYED);
+												message = OPPONET_SHOT+"#"+split[2]+"#"+"true";
+												
+											}else if(teste == BnMatrix.MISS){
+												
+												message = OPPONET_SHOT+"#"+split[2]+"#"+"false"; 
+												
+											}else if(teste == BnMatrix.DESTROYED){
+												
+												// se a coordenada já estiver destruida
+												message = GAME_ERROR +"# coordenada invalida/destruida";
+												
+											}
+											
+											buf = message.getBytes();
+											dt = new DatagramPacket(buf, buf.length, match.player_2.address, match.player_2.port);
+											socket.send(dt);
+											
+										}
+										
+									}
+									
+									break;
+								
 								default:
 									break;
 								}
 								
 							} catch (Exception e) {
-								System.err.println("Server erro:" + e.getMessage());
+								System.err.println("Server erro em " + FIXER + " " + e.getMessage());
+								BnUdpProtocolInterface.sendData(new String(ERROR+"#"+e.getMessage()), address, requestData.getPort(), socket);
 							}
 							
 						}
 						
 					}
 					
+				} catch (BindException be){
+					BnUdpGuiServidor.bConfirmar.setVisible(true);
+					System.err.println("porta inválida. Já está em uso.");
 				} catch (Exception e) {
 					System.err.println("Server " + e.getMessage() );
 					e.printStackTrace();
@@ -355,7 +501,7 @@ public class BnUdpServer extends BnUdpAbstractServer {
 	 * @param name
 	 * @return Retorna um BnUdpClientNode se o cliente estiver ativo, caso contrário, null.
 	 */
-	private BnUdpClientNode getClientByName(String name){
+	private BnUdpClientNode getClientByName(@NotNull String name){
 		BnUdpClientNode clientNode = null;
 		for(int i = 0 ; i < clientList.size(); i++){
 			if(clientList.get(i).name.equals(name)){
@@ -379,7 +525,6 @@ public class BnUdpServer extends BnUdpAbstractServer {
 	 * nas requisições de login e logout.
 	 * @throws IOException
 	 */
-        
 	private void connectedListBroadcast() throws IOException{
 		
 		byte[] buffer = new byte[FRAME_SIZE];

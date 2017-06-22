@@ -1,4 +1,4 @@
-package bnclient;
+package clientmod.bnclient;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -6,9 +6,9 @@ import java.net.SocketException;
 
 import javax.swing.JOptionPane;
 
-import bnguiclient.BnUdpTelaClienteChat;
-import bnguiclient.BnUdpTelaClienteJogo;
-import bnlogin.BnUdpLogin;
+import clientmod.bnguiclient.BnUdpTelaClienteChat;
+import clientmod.bnguiclient.BnUdpTelaClienteJogo;
+import clientmod.bnlogin.BnUdpLogin;
 import bnprotocol.BnUdpServerProtocolInterface;
 
 public class BnUdpMessengerClient extends AbstractClient {
@@ -18,6 +18,8 @@ public class BnUdpMessengerClient extends AbstractClient {
 	private BnUdpTelaClienteChat chat = null;
 	
 	private BnUdpTelaClienteJogo jogo = null;
+	
+	private String FIXER;
 	
 	public BnUdpMessengerClient getInstance(){
 		if(INSTANCE == null)
@@ -43,7 +45,7 @@ public class BnUdpMessengerClient extends AbstractClient {
 			
 			public void run(){
 				
-				System.out.println("Cliente escutando na porta " + socket.getPort());
+				System.out.println("Cliente escutando na porta " + socket.getLocalPort());
 												
 				while(loginStatus){
 					
@@ -62,12 +64,14 @@ public class BnUdpMessengerClient extends AbstractClient {
 								String[] split = requestString.split("#");
 								
 								switch (split[0]) {
-								case SEND_MESSAGE:							
+								case SEND_MESSAGE:	
+									FIXER = "SEND_MESSAGE";
 									String chatString = split[2]+" to "+split[1]+": "+split[3]+"\n";
 									chat.gettChat().setText(chat.gettChat().getText()+chatString);
 									break;
 								
 								case BnUdpServerProtocolInterface.LOGOUT_ACK:
+									FIXER = "LOGOUT_ACK";
 									loginStatus = false;
 									chat.gettChat().setText(chat.gettChat().getText()+"\n"+"Voce foi desconectado (a) . . .");
 									System.out.println("Voce foi desconectado (a) . . . ");
@@ -77,7 +81,8 @@ public class BnUdpMessengerClient extends AbstractClient {
 									}
 									break;
 									
-								case LIST_CONNECTED:					
+								case LIST_CONNECTED:
+									FIXER = "LIST_CONNECTED";
 									System.out.println("Lista de clientes ativos:");
 									
 									String clientString = "";
@@ -89,22 +94,26 @@ public class BnUdpMessengerClient extends AbstractClient {
 									chat.gettUsuarios().setText(clientString);
 									break;
 									
-								case UNKNOWN_USER: 
+								case RUNTIME_ERROR: 
+									FIXER = "RUNTIME_ERROR";
 									chat.gettChat().setText(chat.gettChat().getText()+"Usuario inexistente ou desconectado (a). . .\n");
 									System.out.println("Usuario inexistente ou desconectado (a) . . .");
 									break;				
 									
-								case BnUdpLogin.TIMED_OUT:
+								case clientmod.bnlogin.BnUdpLogin.TIMED_OUT:
+									FIXER = "TIMED_OUT";
 									chat.gettChat().setText(chat.gettChat().getText()+"Nao foi possivel desconectar  . . .\n");
 									System.out.println("Nao foi possivel desconectar . . .");
 									break;
 									
 								case MATCH_REQUEST_ACK:
+									FIXER = "MATCH_REQUEST_ACK";
 									chat.gettChat().setText(chat.gettChat().getText()+"Voce este na fila de espera para jogar . . . \n");
 									System.out.println("Voce esta na fila de espera para jogar . . .");
 									break;
 								
 								case LEAVE_GAME_ACK:
+									FIXER = "LEAVE_GAME_ACK";
 									chat.gettChat().setText(chat.gettChat().getText()+"Voce desistiu da partida.\n");
 									System.out.println("Voce desistiu da partida.");
 									chat.getbDesistir().setEnabled(false);
@@ -113,8 +122,9 @@ public class BnUdpMessengerClient extends AbstractClient {
 									break;
 								
 								case MATCHMAKING:
+									FIXER = "MATCHMAKING";
 									chat.gettChat().setText(chat.gettChat().getText()+"Voce entrou em uma partida.\n");
-									System.out.println("Voce entrou em uma partida."+INSTANCE);
+									System.out.println("Voce entrou em uma partida.");
 									chat.getbJogar().setEnabled(false);
 									chat.getbDesistir().setEnabled(false);
 									jogo = new BnUdpTelaClienteJogo(chat.getServerIP(), Integer.parseInt(chat.getServerPort()), chat.getNickname() );
@@ -123,9 +133,38 @@ public class BnUdpMessengerClient extends AbstractClient {
 									break;
 								
 								case LEAVE_QUEUE_ACK:
+									FIXER = "LEAVE_QUEUE_ACK";
 									chat.gettChat().setText(chat.gettChat().getText()+"Voce saiu da fila de espera da partida.\n");
 									System.out.println("Voce saiu da fila de espera da partida.");
 									
+									break;
+								
+								case MATRIX_ACCEPTED:
+									FIXER = "MATRIX_ACCEPTED";
+									//TODO: matriz do oponente ou própria aceita
+									System.out.println("matriz aceita !");
+									break;
+									
+								case START_GAME:
+									FIXER = "START_GAME";
+									//TODO: desenhar matrizes e começar o jogo
+									//TODO: verificar quem começa
+									System.out.println("começar jogo !");
+									break;
+									
+								case OPPONET_SHOT:
+									FIXER = "OPPONET_SHOT";
+									//TODO: desenha tiro do oponente na matriz
+									System.out.println("tiro do oponente !");
+									break;
+									
+								case MATCH_RESULT:
+									FIXER = "MATCH_RESULT";
+									chat.getbJogar().setEnabled(true);
+									jogo.dispose();
+									JOptionPane.showMessageDialog(null, split[1]+" foi o vencedor !");
+									chat.gettChat().setText(chat.gettChat().getText()+"\n"+"Partida finalizada . . .\n");
+									System.out.println("resultado da partida !");
 									break;
 
 								default:
@@ -134,16 +173,16 @@ public class BnUdpMessengerClient extends AbstractClient {
 								
 								
 							} catch (Exception e) {
-								System.err.println("Cliente erro:" + e.getMessage());
+								System.err.println("Cliente erro em " + FIXER + e.getMessage());
 							} catch (Throwable e) {
-								System.err.println("Cliente erro:" + e.getMessage());
+								System.err.println("Cliente erro em " + FIXER + e.getMessage());
 								e.printStackTrace();
 							}
 							
 						}
 													
 					} catch (Exception e) {
-						System.err.println("Cliente " + e.getMessage());
+						System.err.println("Cliente em " + FIXER + e.getMessage());
 					}
 				}
 				

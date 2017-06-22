@@ -1,4 +1,4 @@
-package bnserver;
+package servermod.bnserver;
 
 import java.net.DatagramSocket;
 import bnprotocol.BnUdpClientProtocolInterface;
@@ -27,5 +27,9 @@ public class BnUdpAbstractServer implements BnUdpServerProtocolInterface, BnUdpC
 	 * 
 	 */
     protected DefaultTableModel clientTableModel;
+
+	public DatagramSocket getSocket() {
+		return socket;
+	}
 
 }

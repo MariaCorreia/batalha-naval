@@ -1,4 +1,4 @@
-import bnguiclient.BnUdpGuiLogin;
+import clientmod.bnguiclient.BnUdpGuiLogin;
 
 /**
  * 

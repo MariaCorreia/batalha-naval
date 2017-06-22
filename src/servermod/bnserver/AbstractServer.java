@@ -1,4 +1,4 @@
-package bnserver;
+package servermod.bnserver;
 
 import java.net.DatagramSocket;
 import bnprotocol.BnUdpClientProtocolInterface;

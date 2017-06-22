@@ -36,7 +36,13 @@ public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	/**
 	 *  Código enviado do servidor indicando que um usuário não existe ou nao esta conectado
 	 */
-	public static final String UNKNOWN_USER = "82";
+	public static final String RUNTIME_ERROR = "82";
+	
+	/**
+	 * 
+	 */
+	public static final String GAME_ERROR = "83";
+	
 	
 	/**
 	 * Numero máximo permitido de conectados. 
@@ -49,5 +55,6 @@ public interface BnUdpServerProtcocolInterface extends BnUdpProtocolInterface {
 	 * Tempo em ms que o servidor atualiza a lista de clientes
 	 */
 	public static final int REFRESH_TIME = 20000;
+
 		
 }

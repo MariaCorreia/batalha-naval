@@ -1,4 +1,4 @@
-import bninterfacegrafica.BnUdpGuiServidor;
+import servermod.bninterfacegrafica.BnUdpGuiServidor;
 
 public class ServerMain {
         

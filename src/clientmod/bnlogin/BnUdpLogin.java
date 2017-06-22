@@ -1,11 +1,10 @@
-package bnlogin;
+package clientmod.bnlogin;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-import bnclient.AbstractClient;
 import bnprotocol.BnUdpClientProtocolInterface;
 import bnprotocol.BnUdpProtocolInterface;
 
@@ -14,7 +13,7 @@ import bnprotocol.BnUdpProtocolInterface;
  * @author levymateus
  *
  */
-public class BnUdpLogin extends AbstractClient implements BnUdpProtocolInterface {
+public class BnUdpLogin extends clientmod.bnclient.AbstractClient implements BnUdpProtocolInterface {
 	
 	private static BnUdpLogin INSTANCE = null;
 	

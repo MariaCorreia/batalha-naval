@@ -1,10 +1,10 @@
-package bnguiclient;
+package clientmod.bnguiclient;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import bnlogin.BnUdpLogin;
+import clientmod.bnlogin.BnUdpLogin;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -138,7 +138,7 @@ public class BnUdpGuiLogin extends JFrame implements  bnprotocol.BnUdpServerProt
 							JOptionPane.showMessageDialog(null, "Tempo limite de resposta excedido\nTente novamente");
 							return;
 							
-						case UNKNOWN_USER:
+						case RUNTIME_ERROR:
 							JOptionPane.showMessageDialog(null, "Usuário Inexistente\nTente novamente");
 							return;
 							

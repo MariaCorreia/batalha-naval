@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bninterfacegrafica;
+package servermod.bninterfacegrafica;
 
-import bnserver.BnUdpServer;
+import servermod.bnserver.BnUdpServer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -151,7 +151,7 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
 
     private void bConfirmarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bConfirmarActionPerformed
         
-		bConfirmar.setEnabled(false);
+		
 		setPort(tPort.getText());
 		//System.out.println(port);
 	    server = new BnUdpServer();
@@ -168,7 +168,7 @@ public class BnUdpGuiServidor extends javax.swing.JFrame {
      */
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton bConfirmar;
+    public static javax.swing.JButton bConfirmar;
     private javax.swing.JButton bConfirmarPort;
     private javax.swing.JFrame fPort;
     private javax.swing.JLabel jLabel1;

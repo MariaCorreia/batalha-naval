@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bnguiclient;
+package clientmod.bnguiclient;
 
 import java.awt.Color;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 
-import bnclient.AbstractClient;
-import bnclient.BnUdpMessengerClient;
+import clientmod.bnclient.AbstractClient;
+import clientmod.bnclient.BnUdpMessengerClient;
 import bnprotocol.BnUdpClientProtocolInterface;
+import bnprotocol.BnUdpProtocolInterface;
 import bnprotocol.BnUdpServerProtocolInterface;
 /**
  *
@@ -25,7 +26,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     private String serverPort;
     private String destinatario;
     private String mensagem;
-    private BnUdpMessengerClient clientMessenger = null;
+    private clientmod.bnclient.BnUdpMessengerClient clientMessenger = null;
     
     /**
      * Creates new form BnUdpTelaClienteChat
@@ -33,7 +34,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     public BnUdpTelaClienteChat() {
         initComponents();
         bDesistir.setEnabled(false);
-        clientMessenger = new BnUdpMessengerClient(this);
+        clientMessenger = new clientmod.bnclient.BnUdpMessengerClient(this);
         clientMessenger.startListning();
         clientMessenger.ping();
     }
@@ -294,7 +295,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     }// </editor-fold>//GEN-END:initComponents
 
     private void tDestinatarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tDestinatarioActionPerformed
-        // TODO add your handling code here:
+    	
     }//GEN-LAST:event_tDestinatarioActionPerformed
 
     private void bEnviarMensagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bEnviarMensagemActionPerformed
@@ -314,7 +315,8 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     	}
     	
     	try {
-			AbstractClient.sendData(data, getServerIP(), Integer.parseInt(getServerPort()) );
+			this.clientMessenger.getInstance();
+			BnUdpProtocolInterface.sendData(data, getServerIP(), Integer.parseInt(getServerPort()), AbstractClient.getSocket());
 		} catch (IOException e) {
 			System.err.println("Client " + clientMessenger + " error:" + e.getMessage());
 		}
@@ -335,7 +337,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
            tDestinatario.setText("");
            tDestinatario.setEditable(true);
            tDestinatario.setForeground(Color.black);
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_tTodosStateChanged
 
     private void bLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLogoutActionPerformed
@@ -347,15 +349,15 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     }
 
     private void tIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tIPActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_tIPActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void tNicknameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tNicknameActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_tNicknameActionPerformed
 
     private void bLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLoginActionPerformed
@@ -376,7 +378,7 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
         
         String data = BnUdpMessengerClient.REQUEST_MATCH+"#"+nickname;
     	try {
-            AbstractClient.sendData(data, getServerIP(), Integer.parseInt(getServerPort()));
+    		BnUdpProtocolInterface.sendData(data, getServerIP(), Integer.parseInt(getServerPort()),  AbstractClient.getSocket() );
 	} catch (IOException e) {
             System.err.println("Client " + clientMessenger + " error:" + e.getMessage());
 	}
@@ -391,15 +393,14 @@ public class BnUdpTelaClienteChat extends javax.swing.JFrame implements BnUdpSer
     }//GEN-LAST:event_bJogarActionPerformed
 
     private void bDesistirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDesistirActionPerformed
-        String data = BnUdpMessengerClient.GET_OUT_QUEUE+"#"+nickname;
+        String data = BnUdpMessengerClient.LEAVE_QUEUE+"#"+nickname;
     	try {
-            AbstractClient.sendData(data, getServerIP(), Integer.parseInt(getServerPort()));
+            BnUdpProtocolInterface.sendData(data, getServerIP(), Integer.parseInt(getServerPort()) ,  AbstractClient.getSocket());
 	} catch (IOException e) {
             System.err.println("Client " + clientMessenger + " error:" + e.getMessage());
 	}
         bJogar.setEnabled(true);
         bDesistir.setEnabled(false);
-        // TODO add your handling code here:
     }//GEN-LAST:event_bDesistirActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

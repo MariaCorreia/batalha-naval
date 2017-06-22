@@ -1,4 +1,4 @@
-package bnserver;
+package servermod.bnserver;
 
 import java.net.InetAddress;
 
@@ -7,7 +7,12 @@ public class BnUdpClientNode {
 	/**
 	 * E true se o client estiver jogando e false se ao contrario.
 	 */
-	protected boolean arePlaying = false;
+	protected boolean inMatch;
+	
+	/**
+	 * Verdadeiro se for a vez do jogador e false ao contrário
+	 */
+	protected boolean isYourTurn;
 	
 	protected String name;
 	
@@ -15,12 +20,23 @@ public class BnUdpClientNode {
 	
 	protected InetAddress address; 
 	
+	/**
+	 * tempo do ultimo ping enviado ao servidor
+	 */
 	private long lastPing;
 	
+	/**
+	 * Matriz referente ao jogo
+	 */
+	private BnMatrix gameMatrix;
+	
 	public BnUdpClientNode(String name, int port, InetAddress address){
+		this.inMatch = false;
+		this.isYourTurn	= false;
 		this.name = name;
 		this.port = port;
 		this.address = address;
+		this.gameMatrix = null;
 		this.lastPing = System.currentTimeMillis();
 	}
 	
@@ -39,11 +55,11 @@ public class BnUdpClientNode {
 	}
 
 	public boolean isArePlaying() {
-		return arePlaying;
+		return inMatch;
 	}
 
 	public void setArePlaying(boolean arePlaying) {
-		this.arePlaying = arePlaying;
+		this.inMatch = arePlaying;
 	}
 
 	public String getName() {
@@ -76,6 +92,14 @@ public class BnUdpClientNode {
 
 	public void setLastPing(long lastPing) {
 		this.lastPing = lastPing;
+	}
+
+	public BnMatrix getGameMatrix() {
+		return gameMatrix;
+	}
+
+	public void setGameMatrix(BnMatrix gameMatrix) {
+		this.gameMatrix = gameMatrix;
 	}
 
 }
